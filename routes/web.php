@@ -25,6 +25,8 @@ Route::group(['middleware' => 'auth'],function(){
     })->name('dashboard');
 
     Route::view(uri:'settings', view:'settings')->name(name:'settings');
+    Route::put(uri:'settings', action:[\App\Http\Controllers\SettingsController::class, 'update'])
+    ->name(name:'settings.update');
 });
 
 require __DIR__.'/auth.php';
