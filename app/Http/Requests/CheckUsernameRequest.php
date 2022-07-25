@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateSettingsRequest extends FormRequest
+class CheckUsernameRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +24,7 @@ class UpdateSettingsRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:20',
-            'email' => 'required|email|string|max:255',
-            'password' => 'nullable|min:8|confirmed',
+            'roblox_username' => 'required|string|alpha_dash|max:20'
         ];
     }
 }

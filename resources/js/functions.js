@@ -59,4 +59,36 @@
             });
         });
     }
+
+    var modals = document.querySelectorAll('.modal');
+    modals.forEach(function(modal) {
+        var toggle_buttons = document.querySelectorAll('[data-modal-toggle="'+modal.id+'"]');
+        console.log('[data-modal-toggle="'+modal.id+'"]');
+        toggle_buttons.forEach(function(button) {
+            button.addEventListener("click", function(){
+                if (modal.classList.contains('hidden')) {
+                    modal.classList.remove('hidden');
+                } else {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+    });
+
+    var button=document.getElementById('roblox-username-confirm-button');
+    button.addEventListener("click", function(e){
+        e.preventDefault();
+        fetch('/settings/check-username',{
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: '{"roblox_username":"'+document.getElementById('roblox_username').value+'"}'
+          })
+        .then((response) => response.json())
+        .then((data) => console.log(data));
+    });
+
+
 //});

@@ -27,6 +27,8 @@ Route::group(['middleware' => 'auth'],function(){
     Route::view(uri:'settings', view:'settings')->name(name:'settings');
     Route::put(uri:'settings', action:[\App\Http\Controllers\SettingsController::class, 'update'])
     ->name(name:'settings.update');
+    Route::put(uri:'settings/check-username', action:[\App\Http\Controllers\SettingsController::class, 'check_username'])
+    ->name(name:'settings.check_username');
 });
 
 require __DIR__.'/auth.php';

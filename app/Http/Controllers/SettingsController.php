@@ -15,4 +15,8 @@ class SettingsController extends Controller
         }
         return redirect()->route(route:'settings')->with('message', 'Settings successfully updated');
     }
+    public function check_username(\App\Http\Requests\CheckUsernameRequest $request){
+        $response = file_get_contents('http://api.roblox.com/users/get-by-username?username='.$request['roblox_username']);
+        return $response;
+    }
 }
