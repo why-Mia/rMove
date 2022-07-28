@@ -75,20 +75,72 @@
         });
     });
 
-    var button=document.getElementById('roblox-username-confirm-button');
-    button.addEventListener("click", function(e){
-        e.preventDefault();
-        fetch('/settings/check-username',{
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: '{"roblox_username":"'+document.getElementById('roblox_username').value+'"}'
-          })
-        .then((response) => response.json())
-        .then((data) => console.log(data));
+    var username_buttons = document.querySelectorAll('#roblox-username-confirm-button');
+    username_buttons.forEach(function(button){
+        button.addEventListener("click", function(e){
+            button.classList.add('loading');
+            e.preventDefault();
+            fetch('/settings/check-username',{
+                method: 'PUT',
+                headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: '{"roblox_username":"'+document.getElementById('roblox_username').value+'"}'
+            })
+            .then((response) => response.json())
+            .then((data) => doStuffWithResponse(data,button));
+        });
     });
+    function doStuffWithResponse(data,button){
+        button.classList.remove('loading');
+        var error_elements = document.querySelectorAll('.username-error-text');
+        if(data.error_in_response === true){
+            error_elements.forEach(error_element => {
+                error_element.textContent = 'Error checking username, please try again later';
+            });
+        }
+        else if(data.user_exists === false){
+            error_elements.forEach(error_element => {
+                error_element.textContent = 'Could not find a valid user with this username, please check that the username you entered is correct';
+            });
+        }
+        else{
+            error_elements.forEach(error_element => {
+                error_element.textContent = '';
+            });
+            document.getElementById('check-username-form').classList.add('hidden');
+            document.getElementById('verify-user-form').classList.remove('hidden');
+            document.getElementById('verification-code').value=data.verification_code;
+            document.getElementById('roblox-profile-link').href='https://www.roblox.com/users/'+data.id+'/profile';
+        }
+    }
 
+
+    var refresh_buttons = document.querySelectorAll('#roblox-refresh-code-button');
+    refresh_buttons.forEach(function(button){
+        button.addEventListener("click", function(e){
+            button.classList.add('loading');
+            e.preventDefault();
+            fetch('/settings/refresh-code',{
+                method: 'PUT',
+                headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: ''
+            })
+            .then((response) => response.json())
+            .then((data) => doStuffWithCodeRefreshResponse(data,button));
+        });
+    });
+    function doStuffWithCodeRefreshResponse(data,button){
+        button.classList.remove('loading');
+        var error_elements = document.querySelectorAll('.username-error-text');
+        error_elements.forEach(error_element => {
+            error_element.textContent = '';
+        });
+        document.getElementById('verification-code').value=data.verification_code;
+    }
 
 //});

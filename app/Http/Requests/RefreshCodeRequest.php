@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CheckUsernameRequest extends FormRequest
+class RefreshCodeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +23,6 @@ class CheckUsernameRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'roblox_username' => 'required|string|alpha_dash'
-        ];
+        return [];
     }
 }

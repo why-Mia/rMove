@@ -8,10 +8,10 @@ header("Access-Control-Allow-Origin: https://api.roblox.com/"); ?>
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 dark:bg-gray-800">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 px-8 bg-white border-b border-gray-200">
+            <div class="bg-white dark:bg-gray-700 dark:text-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 px-8 border-b border-gray-200">
                     <h2 class="font-bold text-2xl mb-3 pb-1 w-auto inline-flex">Account Settings</h2>
                     <x-auth-validation-errors class="mb-4alert alert-success" role="alert" :errors="$errors" />
                     <x-success-message  class="alert alert-success" role="alert"/>
@@ -72,10 +72,10 @@ header("Access-Control-Allow-Origin: https://api.roblox.com/"); ?>
             </div>
         </div>
     </div>
-    <div class="pb-12">
+    <div class="pb-12 dark:bg-gray-800">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 px-8 bg-white border-b border-gray-200">
+            <div class="bg-white dark:bg-gray-700 dark:text-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 px-8 border-b border-gray-200">
                     <h2 class="font-bold text-2xl mb-3 pb-1 w-auto inline-flex">Profile Settings</h2>
                     <x-auth-validation-errors class="mb-4alert alert-success" role="alert" :errors="$errors" />
                     <x-success-message  class="alert alert-success" role="alert"/>
@@ -168,25 +168,54 @@ header("Access-Control-Allow-Origin: https://api.roblox.com/"); ?>
                   </button>
               </div>
               <!-- Modal body -->
-              <div class="p-6 space-y-6">
-                <form method="POST" action="{{route('settings.check_username')}}">
+              <form id="check-username-form" method="POST" action="{{route('settings.refresh_code')}}">
                 @method('PUT')
                 @csrf
+              <div class="p-6">
+                <span class="username-error-text dark:text-red-400 text-red-700 mb-4"></span>
                   <p class="text-base leading-relaxed text-gray-900 dark:text-gray-100">
                       To get started, enter your Roblox Username:
                   </p>
-                  <x-input id="roblox_username" class="block w-full my-2" type="text" name="roblox_username" />
+                  <x-input id="roblox_username" class="block w-full my-5" type="text" name="roblox_username" />
                   <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
                     (NOT your display name)
                   </p>
-                  <button id="roblox-username-confirm-button" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Continue</button>
-                </form>
               </div>
               <!-- Modal footer -->
               <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-200 dark:border-gray-600">
-                  <!--<button id="roblox-username-confirm-button" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Continue</button>-->
+                <button id="roblox-username-confirm-button" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Continue</button>
                   <button data-modal-toggle="roblox-account-linking-modal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Cancel</button>
               </div>
+            </form>
+            <form id="verify-user-form" class="hidden" method="POST" action="">
+                @method('PUT')
+                @csrf
+              <div class="p-6 space-y-2">
+                <span class="username-error-text dark:text-red-400 text-red-700 mb-4"></span>
+                  <p class="text-base leading-relaxed text-gray-900 dark:text-gray-100">
+                      To complete the account linking process, follow the steps below:
+                        <ul class="text-gray-900 dark:text-gray-100 list-decimal list-inside">
+                            <li>Go to your <a id="roblox-profile-link" href="#" class="dark:text-blue-400 text-blue-900 underline" target="_blank" rel="noopener noreferrer">Roblox profile</a>.</li>
+                            <li>Edit your <strong>About</strong> section by clicking the button shown below
+                            <img src="/img/about-edit-example.jpg" class="ml-4 mb-3 mt-1"></li>
+                            <li>Copy the following text into to your About section:</li>
+                            <div class="flex mt-2 mb-1">
+                                <x-input id="verification-code" class="block w-full rounded-r-none text-black" type="text" name="name" value="If you see this text, things did a break" autofocus />
+                                <span id="roblox-refresh-code-button" class="btn-dark rounded-l-none border disabled:opacity-25 uppercase tracking-wider whitespace-nowrap">New code</span>
+                            </div>
+                            <span class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                                This can be removed after your account has been verified.
+                            </span>
+                            <li class="mt-3"><strong>Save</strong> and ensure that the text isn't censored.<br> If the code is censored, press <strong>New Code</strong> and repeat.</li>
+                        </ul>
+                  </p>
+              </div>
+              <!-- Modal footer -->
+              <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-200 dark:border-gray-600">
+                <button id="roblox-username-confirm-button" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Continue</button>
+                  <button data-modal-toggle="roblox-account-linking-modal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Cancel</button>
+              </div>
+            </form>
           </div>
       </div>
   </div>

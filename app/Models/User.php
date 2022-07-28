@@ -21,6 +21,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'primary_game',
+        'roblox_id',
+        'roblox_username',
+        'roblox_account_verified_at',
+        'times',
+        'times_last_updated_at',
+        'roblox_verification_code',
+        'user_activity_status'
     ];
 
     /**

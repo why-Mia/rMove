@@ -29,6 +29,8 @@ Route::group(['middleware' => 'auth'],function(){
     ->name(name:'settings.update');
     Route::put(uri:'settings/check-username', action:[\App\Http\Controllers\SettingsController::class, 'check_username'])
     ->name(name:'settings.check_username');
+    Route::put(uri:'settings/refresh-code', action:[\App\Http\Controllers\SettingsController::class, 'refresh_verification_code'])
+    ->name(name:'settings.refresh_code');
 });
 
 require __DIR__.'/auth.php';
