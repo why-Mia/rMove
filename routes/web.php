@@ -31,6 +31,10 @@ Route::group(['middleware' => 'auth'],function(){
     ->name(name:'settings.check_username');
     Route::put(uri:'settings/refresh-code', action:[\App\Http\Controllers\SettingsController::class, 'refresh_verification_code'])
     ->name(name:'settings.refresh_code');
+    Route::put(uri:'settings/verify-account', action:[\App\Http\Controllers\SettingsController::class, 'verify_account'])
+    ->name(name:'settings.verify_account');
+    Route::put(uri:'settings/unlink-account', action:[\App\Http\Controllers\SettingsController::class, 'unlink_account'])
+    ->name(name:'settings.unlink_account');
 });
 
 require __DIR__.'/auth.php';

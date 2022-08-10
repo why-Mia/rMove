@@ -1,4 +1,8 @@
 
+
+
+
+
 //document.addEventListener('DOMContentLoaded', function () {
     function isEmpty(str) {
         return (!str || str.length === 0 );
@@ -62,14 +66,17 @@
 
     var modals = document.querySelectorAll('.modal');
     modals.forEach(function(modal) {
+        var modal_overlay = document.getElementById('modal-overlay');
         var toggle_buttons = document.querySelectorAll('[data-modal-toggle="'+modal.id+'"]');
         console.log('[data-modal-toggle="'+modal.id+'"]');
         toggle_buttons.forEach(function(button) {
             button.addEventListener("click", function(){
                 if (modal.classList.contains('hidden')) {
                     modal.classList.remove('hidden');
+                    modal_overlay.classList.remove('hidden');
                 } else {
                     modal.classList.add('hidden');
+                    modal_overlay.classList.add('hidden');
                 }
             });
         });
@@ -143,4 +150,46 @@
         document.getElementById('verification-code').value=data.verification_code;
     }
 
+
+
+    var complete_verification_buttons = document.querySelectorAll('#complete-verification-button');
+    complete_verification_buttons.forEach(function(button){
+        button.addEventListener("click", function(e){
+            button.classList.add('loading');
+            e.preventDefault();
+            fetch('/settings/verify-account',{
+                method: 'PUT',
+                headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: '{"roblox_username":"'+document.getElementById('roblox_username').value+'"}'
+            })
+            .then((response) => response.json())
+            .then((data) => doStuffWithVerifyResponse(data,button));
+        });
+    });
+    function doStuffWithVerifyResponse(data,button){
+        
+        button.classList.remove('loading');
+        var error_elements = document.querySelectorAll('.username-error-text');
+        if(data.error_in_response === true){
+            error_elements.forEach(error_element => {
+                error_element.textContent = 'Error checking username, please try again later';
+            });
+        }
+        else if(data.user_exists === false){
+            error_elements.forEach(error_element => {
+                error_element.textContent = 'Could not find a valid account with this username, please check that the username you entered previously is correct';
+            });
+        }
+        else if(data.description_string_found === false){
+            error_elements.forEach(error_element => {
+                error_element.textContent = "Could not find code in account description. This could be because the text is filtered, your about section hasn't updated yet, or the wrong username was entered in the previous step (the 'Roblox profile' link below should lead to your account).";
+            });
+        }
+        else{
+            location.reload();
+        }
+    }
 //});
