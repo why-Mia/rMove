@@ -84,13 +84,21 @@ class SettingsController extends Controller
                     if(str_contains($description_check_response->description, auth()->user()->roblox_verification_code)){
                         
                         $user = auth()->user();
-                        //$currently_linked_accounts = $user->robloxAccounts;
+                        //If the entered user ID is already linked to the current user, update that account
                         if($user->robloxAccounts()->where('roblox_id',$user_data_response->id)->exists()){
                             $roblox_account = $user->robloxAccounts()->where('roblox_id',$user_data_response->id)->first();
                         }
+                        //Otherwise, make a new account to link
                         else{
                             $roblox_account = new \App\Models\RobloxAccount;
                         }
+                        //If the user already has a linked account set as the primary account, change the other account's is_primary_account to false
+                        if($user->robloxAccounts()->where('is_primary_account',true)->exists()){ 
+                            $user->robloxAccounts()->where('is_primary_account',true)->update([
+                                'is_primary_account' => false
+                            ]);
+                        }
+                        $roblox_account->is_primary_account = true;
                         $roblox_account->roblox_id = $user_data_response->id;
                         $roblox_account->username = $user_data_response->name;
                         $roblox_account->displayname = $user_data_response->displayName;
@@ -121,11 +129,11 @@ class SettingsController extends Controller
         else{
             return redirect()->route(route:'settings')->with('error', 'no');
         }
-        auth()->user()->update([
+        /*auth()->user()->update([
             'roblox_id' => null,
             'roblox_username' => null,
             'roblox_account_verified_at' => null
-        ]);
+        ]);*/
         
     }
 

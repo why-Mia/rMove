@@ -15,10 +15,6 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->integer('primary_game')->nullable();
-            $table->bigInteger('roblox_id')->nullable();
-            $table->string('roblox_username')->nullable();
-            $table->dateTime('roblox_account_verified_at')->nullable();
-            $table->string('times')->nullable();
             //
         });
     }
@@ -31,7 +27,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['primary_game', 'roblox_id', 'roblox_username', 'roblox_account_verified_at', 'times']);
+            $table->dropColumn(['primary_game']);
             //
         });
     }

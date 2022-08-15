@@ -87,19 +87,21 @@ header("Access-Control-Allow-Origin: https://api.roblox.com/"); ?>
                                     <div class="flex justify-between mt-1">
                                         <div class="w-full text-to-update mt-2">
                                             <?php if(auth()->user()->robloxAccounts()->exists()){ ?>
-                                                <?php $first_roblox_account = auth()->user()->robloxAccounts[0]; ?>
-                                                <p>Currently linked account: <strong><?php echo $first_roblox_account->username ?></strong> (<?php echo $first_roblox_account->roblox_id ?>) </p>
-                                                <x-button class="mt-2" data-modal-toggle="roblox-account-linking-modal">
-                                                    Change Linked Account
-                                                </x-button>
-                                                <x-button data-modal-toggle="unlink-roblox-account-modal" class="ml-1 transparent text-gray-500 dark:text-gray-300 dark:hover:text-white dark:hover:bg-main-500 border-gray-200 dark:border-gray-500 dark:focus:ring-gray-600">
-                                                    Unlink Account
-                                                </x-button>
-                                            <?php }else{ ?>
-                                                <p>No linked Roblox account! Click below to link your account.</p>
-                                                <x-button class="mt-2" data-modal-toggle="roblox-account-linking-modal">
-                                                    Link Roblox Account
-                                                </x-button>
+                                                <?php if(auth()->user()->robloxAccounts()->where('is_primary_account',true)->exists()){ ?>
+                                                    <?php $primary_roblox_account = auth()->user()->robloxAccounts()->where('is_primary_account',true)->first() ?>
+                                                    <p>Current primary account: <strong><?php echo $primary_roblox_account->username ?></strong> (<?php echo $primary_roblox_account->roblox_id ?>) </p>
+                                                    <x-button class="mt-2" data-modal-toggle="roblox-account-linking-modal">
+                                                        Change Primary Account
+                                                    </x-button>
+                                                    <x-button data-modal-toggle="unlink-roblox-account-modal" class="ml-1 transparent text-gray-500 dark:text-gray-300 dark:hover:text-white dark:hover:bg-main-500 border-gray-200 dark:border-gray-500 dark:focus:ring-gray-600">
+                                                        Unlink Primary Account
+                                                    </x-button>
+                                                <?php }else{ ?>
+                                                    <p>No linked Roblox account! Click below to link your account.</p>
+                                                    <x-button class="mt-2" data-modal-toggle="roblox-account-linking-modal">
+                                                        Link Roblox Account
+                                                    </x-button>
+                                                <?php } ?>
                                             <?php } ?>
                                         </div>
 
@@ -216,10 +218,13 @@ header("Access-Control-Allow-Origin: https://api.roblox.com/"); ?>
                     @method('PUT')
                     @csrf
                 <div class="p-6">
-                    <input hidden id="roblox_id" name="roblox_id" value="<?php echo $first_roblox_account->roblox_id ?>">
+                    <input hidden id="roblox_id" name="roblox_id" value="<?php echo $primary_roblox_account->roblox_id ?>">
                     <span class="username-error-text dark:text-red-400 text-red-700 mb-4"></span>
+                    <p class="text-base leading-relaxed text-gray-900 dark:text-gray-100 mb-4">
+                        Unlinking your primary account will <strong>hide your public profile</strong> until a new account is linked.
+                    </p>
                     <p class="text-base leading-relaxed text-gray-900 dark:text-gray-100">
-                        idk why youd want to do this
+                        If you just want to change to a different primary account, use the "<strong>Change Primary Account</strong>" option instead.
                     </p>
                 </div>
                 <!-- Modal footer -->

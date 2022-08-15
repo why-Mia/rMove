@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('username')->nullable();
             $table->string('displayname')->nullable();
             $table->string('avatar_image_url')->nullable();
+            $table->integer('user_activity_status')->nullable();
+            $table->dateTime('times_last_updated_at')->nullable();
             $table->timestamps();
         });
     }
