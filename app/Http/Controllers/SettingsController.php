@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Classes\ApiRequest;
+use App\Models\RobloxAccount;
 
 class SettingsController extends Controller
 {
@@ -17,22 +19,25 @@ class SettingsController extends Controller
     }
 
     public function check_username(\App\Http\Requests\CheckUsernameRequest $request){
-        $response = @file_get_contents('http://api.roblox.com/users/get-by-username?username='.$request['roblox_username']);
-        if($response === false){
-            return  json_encode(['error_in_response' => true]);
-        }
-        else{
-            $response = json_decode($response);
-            if(property_exists($response,'Id')){
+        $url = 'https://users.roblox.com/v1/usernames/users';
+        $data = array('usernames' => [$request['roblox_username']]);
+        $users_api_request = new ApiRequest();
+        $user_data = $users_api_request->post($url, $data);
+        if($user_data !== false){
+            $user_data = $user_data->data[0];
+            if(property_exists($user_data,'id')){
                 $verification_code = $this->create_code();
                 auth()->user()->update([
                     'roblox_verification_code' => $verification_code
                 ]);
-                return json_encode(['user_exists' => true, 'error_in_response' => false, 'id' => $response->Id, 'verification_code' => $verification_code]);
+                return json_encode(['user_exists' => true, 'error_in_response' => false, 'id' => $user_data->id, 'verification_code' => $verification_code]);
             }
             else{
                 return json_encode(['user_exists' => false, 'error_in_response' => false]);
             }
+        }
+        else{
+            return  json_encode(['error_in_response' => true]);
         }
     }
 
@@ -45,80 +50,57 @@ class SettingsController extends Controller
     }
 
     public function verify_account(\App\Http\Requests\VerifyAccountRequest $request){
-        //$username_check_response = @file_get_contents('http://api.roblox.com/users/get-by-username?username='.$request['roblox_username']);
         $url = 'https://users.roblox.com/v1/usernames/users';
         $data = array('usernames' => [$request['roblox_username']]);
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        $headers = array(
-            "Accept: application/json",
-            "Content-Type: application/json",
-         );
-         
-        $data = http_build_query($data);
-
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-
-        $user_data_response = curl_exec($curl);
-        curl_close($curl);
-        if($user_data_response === false){
-            return  json_encode(['error_in_response' => true,]);
-        }
-        else{
-            $user_data_response = json_decode($user_data_response);
-            $user_data_response = $user_data_response->data[0];
-            if(property_exists($user_data_response, 'id') && property_exists($user_data_response, 'name') ){
-                $description_check_response = @file_get_contents('https://users.roblox.com/v1/users/'.$user_data_response->id);
-                if($description_check_response === false){
-                    return  json_encode(['error_in_response' => true]);
-                }
-                $description_check_response = json_decode($description_check_response);
-                $avatar_image_response_json = @file_get_contents('https://thumbnails.roblox.com/v1/users/avatar?userIds='.$user_data_response->id.'&size=250x250&format=Png&isCircular=false');
-                $avatar_image_response = json_decode($avatar_image_response_json)->data[0];
-                if($avatar_image_response_json === false || !property_exists($avatar_image_response, 'imageUrl')){
-                    return  json_encode(['error_in_response' => true]);
-                }
-                if(property_exists($description_check_response, 'description')){
-                    if(str_contains($description_check_response->description, auth()->user()->roblox_verification_code)){
-                        
-                        $user = auth()->user();
-                        //If the entered user ID is already linked to the current user, update that account
-                        if($user->robloxAccounts()->where('roblox_id',$user_data_response->id)->exists()){
-                            $roblox_account = $user->robloxAccounts()->where('roblox_id',$user_data_response->id)->first();
+        $users_api_request = new ApiRequest();
+        $user_data = $users_api_request->post($url, $data);
+        if($user_data !== false){
+            $user_data = $user_data->data[0];
+            if(property_exists($user_data, 'id') && property_exists($user_data, 'name') ){
+                $description_api_request = new ApiRequest();
+                $user_description_data = $description_api_request->get('https://users.roblox.com/v1/users/'.$user_data->id);
+                $avatar_api_request = new ApiRequest();
+                $avatar_data = $avatar_api_request->get('https://thumbnails.roblox.com/v1/users/avatar?userIds='.$user_data->id.'&size=250x250&format=Png&isCircular=false');
+                if($avatar_data !== false && property_exists($avatar_data->data[0], 'imageUrl')){
+                    $avatar_data = $avatar_data->data[0];
+                    if($user_description_data !== false && property_exists($user_description_data, 'description')){
+                        if(str_contains($user_description_data->description, auth()->user()->roblox_verification_code)){ //If user description contains verification code
+                            $user = auth()->user();
+                            //If the entered user ID is already linked to the current user, update that account
+                            if($user->robloxAccounts()->where('roblox_id',$user_data->id)->exists()){
+                                $roblox_account = $user->robloxAccounts()->where('roblox_id',$user_data->id)->first();
+                            }
+                            //Otherwise, make a new account to link
+                            else{
+                                $roblox_account = new RobloxAccount;
+                            }
+                            //If the user already has a linked account set as the primary account, change the other account's is_primary_account to false
+                            if($user->robloxAccounts()->where('is_primary_account',true)->exists()){ 
+                                $user->robloxAccounts()->where('is_primary_account',true)->update([
+                                    'is_primary_account' => false
+                                ]);
+                            }
+                            $roblox_account->is_primary_account = true;
+                            $roblox_account->roblox_id = $user_data->id;
+                            $roblox_account->username = $user_data->name;
+                            $roblox_account->displayname = $user_data->displayName;
+                            $roblox_account->avatar_image_url = $avatar_data->imageUrl;
+                            $user->robloxAccounts()->save($roblox_account);
+                            \Session::flash('message','Roblox account successfully linked');
+                            return json_encode(['user_exists' => true, 'error_in_response' => false, 'description_string_found' => true]);
                         }
-                        //Otherwise, make a new account to link
                         else{
-                            $roblox_account = new \App\Models\RobloxAccount;
+                            //Description string not found
+                            return json_encode(['user_exists' => true, 'error_in_response' => false, 'description_string_found' => false]);
                         }
-                        //If the user already has a linked account set as the primary account, change the other account's is_primary_account to false
-                        if($user->robloxAccounts()->where('is_primary_account',true)->exists()){ 
-                            $user->robloxAccounts()->where('is_primary_account',true)->update([
-                                'is_primary_account' => false
-                            ]);
-                        }
-                        $roblox_account->is_primary_account = true;
-                        $roblox_account->roblox_id = $user_data_response->id;
-                        $roblox_account->username = $user_data_response->name;
-                        $roblox_account->displayname = $user_data_response->displayName;
-                        $roblox_account->avatar_image_url = $avatar_image_response->imageUrl;
-                        $user->robloxAccounts()->save($roblox_account);
-                        \Session::flash('message','Roblox account successfully linked');
-                        return json_encode(['user_exists' => true, 'error_in_response' => false, 'description_string_found' => true]);
-                    }
-                    else{
-                        return json_encode(['user_exists' => true, 'error_in_response' => false, 'description_string_found' => false]);
                     }
                 }
-                else{
-                    return  json_encode(['user_exists' => false, 'error_in_response' => false]);
-                }
             }
-            else{
-                return json_encode(['user_exists' => false, 'error_in_response' => false]);
-            }
+            //If user data was found but no other return path was reached, there was an error in one of the API responses
+            return  json_encode(['user_exists' => true, 'error_in_response' => true]); 
         }
+        //User doesn't exist
+        return json_encode(['user_exists' => false, 'error_in_response' => false]);
     }
 
     public function unlink_account(\App\Http\Requests\UnlinkAccountRequest $request){
@@ -128,13 +110,7 @@ class SettingsController extends Controller
         }
         else{
             return redirect()->route(route:'settings')->with('error', 'no');
-        }
-        /*auth()->user()->update([
-            'roblox_id' => null,
-            'roblox_username' => null,
-            'roblox_account_verified_at' => null
-        ]);*/
-        
+        }        
     }
 
     private function create_code(){
