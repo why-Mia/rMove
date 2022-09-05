@@ -66,6 +66,13 @@ class SettingsController extends Controller
                     if($user_description_data !== false && property_exists($user_description_data, 'description')){
                         if(str_contains($user_description_data->description, auth()->user()->roblox_verification_code)){ //If user description contains verification code
                             $user = auth()->user();
+                            //If the user already has a linked account set as the primary account,  ̶c̶h̶a̶n̶g̶e̶ ̶t̶h̶e̶ ̶o̶t̶h̶e̶r̶ ̶a̶c̶c̶o̶u̶n̶t̶'̶s̶ ̶i̶s̶_̶p̶r̶i̶m̶a̶r̶y̶_̶a̶c̶c̶o̶u̶n̶t̶ ̶t̶o̶ ̶f̶a̶l̶s̶e̶  delete the account
+                            if($user->robloxAccounts()->where('is_primary_account',true)->exists()){ 
+                                /*$user->robloxAccounts()->where('is_primary_account',true)->update([
+                                    'is_primary_account' => false
+                                ]);*/
+                                $user->robloxAccounts()->where('is_primary_account',true)->delete();
+                            }
                             //If the entered user ID is already linked to the current user, update that account
                             if($user->robloxAccounts()->where('roblox_id',$user_data->id)->exists()){
                                 $roblox_account = $user->robloxAccounts()->where('roblox_id',$user_data->id)->first();
@@ -73,12 +80,6 @@ class SettingsController extends Controller
                             //Otherwise, make a new account to link
                             else{
                                 $roblox_account = new RobloxAccount;
-                            }
-                            //If the user already has a linked account set as the primary account, change the other account's is_primary_account to false
-                            if($user->robloxAccounts()->where('is_primary_account',true)->exists()){ 
-                                $user->robloxAccounts()->where('is_primary_account',true)->update([
-                                    'is_primary_account' => false
-                                ]);
                             }
                             $roblox_account->is_primary_account = true;
                             $roblox_account->roblox_id = $user_data->id;
