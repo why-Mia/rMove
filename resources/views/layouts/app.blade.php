@@ -21,15 +21,11 @@
         @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/functions.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-main-950">
+        <div class="min-h-screen bg-gray-300 dark:bg-main-950">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
-            <header class="bg-white dark:bg-main-700 dark:text-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
+
 
             <!-- Page Content -->
             <main>
