@@ -77,3 +77,93 @@ html:not(.dark) .btn-dark:hover{
 ul li{
     margin-bottom:0.5rem;
 }
+table tr:not(.table-header):nth-child(odd){
+    background-color:#00000010;
+}
+html:not(.dark) table tr:not(.table-header):nth-child(odd){
+    background-color:#00000005;
+}
+table tr:not(.table-header):hover{
+    background-color:#00000020 !important;
+}
+html:not(.dark) table tr:not(.table-header):hover{
+    background-color:#00000012 !important;
+}
+table tr td{
+    padding:0.25rem 0.75rem;
+}
+table tr td span{
+    display:block;
+    text-overflow:ellipsis;
+    overflow:hidden;
+}
+table tr th{
+    padding:0.25rem 0.75rem;
+}
+
+table.times-table tr{
+    display:flex;
+    justify-content:stretch;
+}
+
+table.times-table tr .map-name{
+    width:40%;
+}
+
+table.times-table tr .style{
+    width:20%;
+}
+
+table.times-table tr .time{
+    width:20%;
+}
+
+table.times-table tr .date{
+    width:20%;
+}
+
+@media screen and (max-width:767px) {
+    table.times-table tr{
+        flex-wrap:wrap;
+    }
+    table.times-table tr .map-name{
+        width:60%;
+        order:1;
+        text-align:start;
+        font-weight:700;
+    }
+
+    table.times-table tr .map-name span:after{
+        height:50%;
+        width: auto;
+        border-bottom:1px solid #fff;
+        display:inline-block;
+        content:'';
+    }
+    
+    table.times-table tr .style{
+        width:50%;
+        order:3;
+        text-align:start;
+        opacity:0.8;
+    }
+    
+    table.times-table tr .time{
+        width:40%;
+        order:2;
+        text-align:end;
+        font-weight:700;
+    }
+    
+    table.times-table tr .date{
+        width:50%;
+        order:4;
+        text-align:end;
+        opacity:0.8;
+    }
+}
+
+table tbody{
+    display:block;
+}
+
