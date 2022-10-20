@@ -15,10 +15,9 @@ return new class extends Migration
     {
         Schema::create('roblox_accounts', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')
             ->onDelete('cascade');
-            $table->bigInteger('roblox_id')->unique();
             $table->string('username')->nullable();
             $table->string('displayname')->nullable();
             $table->string('avatar_image_url')->nullable();

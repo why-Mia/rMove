@@ -5,13 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RobloxAccount extends Model
+class Map extends Model
 {
     use HasFactory;
-
-    public function user(){
-        return $this->belongsTo(User::class);
-    }
 
     public function times(){
         return $this->hasMany(Time::class);

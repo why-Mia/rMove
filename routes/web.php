@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,6 +17,14 @@ Route::get('/', function () {
 });
 
 
+ 
+Route::get('/user/{id}', [\App\Http\Controllers\UserController::class, 'show']);
+
+Route::get('/map/{id}', [\App\Http\Controllers\MapsController::class, 'show']);
+
+Route::get('/maps/refresh', [\App\Http\Controllers\MapsController::class, 'refresh']);
+
+Route::get('/times/refresh', [\App\Http\Controllers\TimesController::class, 'refresh']);
 
 Route::group(['middleware' => 'auth'],function(){
     Route::get('/dashboard', function () {

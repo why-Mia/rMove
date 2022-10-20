@@ -16,6 +16,10 @@ class User extends Authenticatable
         return $this->hasMany(RobloxAccount::class);
     }
 
+    public function times(){
+        return $this->hasManyThrough(Time::class, RobloxAccount::class);
+    }
+
 
     /**
      * The attributes that are mass assignable.

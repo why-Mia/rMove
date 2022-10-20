@@ -4,11 +4,11 @@
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
+    <?php if(auth()->user()->robloxAccounts()->where('is_primary_account',true)->exists()){ ?>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-main-650 text-gray-800 dark:text-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-4 sm:p-8 border-b border-gray-200  dark:border-gray-600">
-                    <?php if(auth()->user()->robloxAccounts()->where('is_primary_account',true)->exists()){ ?>
                     <?php $primary_roblox_account = auth()->user()->robloxAccounts()->where('is_primary_account',true)->first(); ?>
                     <div class="grid grid-cols-12">
                         <div class="col-span-12 md:col-span-6 lg:col-span-3 md:mr-5">
@@ -105,12 +105,24 @@
                               
                         </div>
                     </div>
-                    <?php }else{ ?>
-
-
-                    <?php } ?>
+                    
                 </div>
             </div>
         </div>
     </div>
+    <?php }else{ ?>
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white dark:bg-main-650 text-gray-800 dark:text-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-4 sm:p-8 border-b border-gray-200  dark:border-gray-600 flex flex-col justify-center items-center">
+                        <p>You need to link a Roblox account to view your profile.</p>
+                        <x-button class="mt-4 px-7 py-3 text-base" data-modal-toggle="roblox-account-linking-modal">
+                            Link Roblox Account
+                        </x-button>
+                    </div>
+                </div>  
+            </div>
+        </div>
+        <x-roblox-account-link-modals></x-roblox-account-link-modals>
+    <?php } ?>
 </x-app-layout>
