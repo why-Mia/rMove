@@ -80,13 +80,14 @@ function format_game($game){
                                 $bhop_times_html = '';
                                 $surf_times_html = '';
                                 foreach ($times as $time) {
-                                    $time_html = '
-                                    <tr class="border-b border-gray-200 dark:border-main-750  text-gray-700 dark:text-gray-100 hover:text-black dark:hover:text-white">
-                                            <td class="map-name"><a href="/map/'.$time->map->id.'"><span>'.trim($time->map->displayname).'</span></a></td>
-                                            <td class="time"><span>'.trim(format_time($time->time)).'</span></td>
-                                            <td class="style"><span>'.trim(format_style($time->style)).'</span></td>
-                                            <td class="date"><span>'.trim($time->date).'</span></td>
-                                    </tr>';
+                                    $time_html = '<a href="/map/'.$time->map->id.'">
+                                    <div class="tr border-b border-gray-200 dark:border-main-750  text-gray-700 dark:text-gray-100 hover:text-black dark:hover:text-white">
+                                            <div class="td map-name"><span>'.trim($time->map->displayname).'</span></div>
+                                            <div class="td time"><span>'.trim(format_time($time->time)).'</span></div>
+                                            <div class="td style"><span>'.trim(format_style($time->style)).'</span></div>
+                                            <div class="td date"><span>'.trim($time->date).'</span></div>
+                                    </div>
+                                    </a>';
                                     $all_times_html .= $time_html;
                                     switch ($time->game) {
                                         case 1:
@@ -102,32 +103,33 @@ function format_game($game){
                                 }
 
                                 ?>
-                                <table id="times-tab-1" class="times-table block w-full text-left border-x-2 border-b-2 dark:bg-main-700 border-gray-200 dark:border-main-700 rounded-lg">
-                                    <tr class="table-header bg-gray-200 dark:bg-main-800">
-                                        <th class="map-name">Map</th>
-                                        <th class="time">Time</th>
-                                        <th class="style">Style</th>
-                                        <th class="date">Date</th>
-                                    </tr>
+                                <div id="times-tab-1" class="times-table block w-full text-left border-x-2 border-b-2 dark:bg-main-700 border-gray-200 dark:border-main-800">
+                                    <div class="tr table-header bg-gray-200 dark:bg-main-800">
+                                        <div class="th map-name">Map</div>
+                                        <div class="th time">Time</div>
+                                        <div class="th style">Style</div>
+                                        <div class="th date">Date</div>
+                                    </div>
                                 <?php echo $bhop_times_html; ?>
-                                <table id="times-tab-2" class="times-table block w-full text-left border-x-2 border-b-2 dark:bg-main-700 border-gray-200 dark:border-main-700 rounded-lg">
-                                    <tr class="table-header bg-gray-200 dark:bg-main-800">
-                                        <th class="map-name">Map</th>
-                                        <th class="time">Time</th>
-                                        <th class="style">Style</th>
-                                        <th class="date">Date</th>
-                                    </tr>
+                                </div>
+                                <div id="times-tab-2" class="times-table block w-full text-left border-x-2 border-b-2 dark:bg-main-700 border-gray-200 dark:border-main-800">
+                                    <div class="tr table-header bg-gray-200 dark:bg-main-800">
+                                        <div class="th map-name">Map</div>
+                                        <div class="th time">Time</div>
+                                        <div class="th style">Style</div>
+                                        <div class="th date">Date</div>
+                                    </div>
                                     <?php echo $surf_times_html; ?>
-                                </table>
-                                <table id="times-tab-3" class="times-table block w-full text-left border-x-2 border-b-2 dark:bg-main-700 border-gray-200 dark:border-main-700 rounded-lg">
-                                    <tr class="table-header bg-gray-200 dark:bg-main-800">
-                                        <th class="map-name">Map</th>
-                                        <th class="time">Time</th>
-                                        <th class="style">Style</th>
-                                        <th class="date">Date</th>
-                                    </tr>
+                                </div>
+                                <div id="times-tab-3" class="times-table block w-full text-left border-x-2 border-b-2 dark:bg-main-700 border-gray-200 dark:border-main-800">
+                                    <div class="tr table-header bg-gray-200 dark:bg-main-800">
+                                        <div class="th map-name">Map</div>
+                                        <div class="th time">Time</div>
+                                        <div class="th style">Style</div>
+                                        <div class="th date">Date</div>
+                                    </div>
                                     <?php echo $all_times_html; ?>
-                                </table>
+                                </div>
                             </div>
                         </div>
                     </div>
