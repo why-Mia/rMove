@@ -45,15 +45,20 @@ class MapsController extends Controller
     private function get_all()
     {
         $url = 'https://api.strafes.net/v1/map';
-        $maps_api_request = new ApiRequest();
-        $maps_data = $maps_api_request->get($url);
-        $headers = $maps_data['headers'];
-        $data = $maps_data['data'];
-        for ($i=2; $i <= intval($headers['pagination-count'][0]); $i++) { 
+        $strafes_maps_request = new ApiRequest($url);
+        $strafes_maps_request->useStrafesNetApiKey();
+        $strafes_maps_request->sendGetRequest();
+        $maps_data = $strafes_maps_request->getResponseData();
+        $maps_headers = $strafes_maps_request->getResponseHeaders();
+        $data = $maps_data;
+        for ($i=2; $i <= intval($maps_headers['pagination-count'][0]); $i++) { 
             $url = 'https://api.strafes.net/v1/map?page='.$i;
-            $maps_api_request = new ApiRequest();
-            $maps_data = $maps_api_request->get($url);
-            $data = array_merge($data,$maps_data['data']);
+            $strafes_maps_request = new ApiRequest($url);
+            $strafes_maps_request->useStrafesNetApiKey();
+            $strafes_maps_request->sendGetRequest();
+            $maps_data = $strafes_maps_request->getResponseData();
+            $maps_headers = $strafes_maps_request->getResponseHeaders();
+            $data = array_merge($data,$maps_data);
         }
         return $data;
     }
