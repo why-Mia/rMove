@@ -12,11 +12,12 @@ return new class extends Migration
      * @return void
      */
     public function up()
-    {
+    {//TODO: adding times fails if no map found.
         Schema::create('times', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('roblox_account_id');
-            $table->foreign('roblox_account_id')->references('id')->on('roblox_accounts');
+            $table->foreign('roblox_account_id')->references('id')->on('roblox_accounts')
+            ->onDelete('cascade');
             $table->integer('time');
             $table->unsignedBigInteger('map_id');
             $table->foreign('map_id')->references('id')->on('maps')
