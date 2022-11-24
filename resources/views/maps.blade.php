@@ -1,34 +1,16 @@
 <?php
-function format_time($time){
-    $total_time_milliseconds = $time;
-    $millisecs = floor($total_time_milliseconds % 1000);
-    $secs = floor($total_time_milliseconds/1000 % 60);
-    $mins = floor($total_time_milliseconds/1000 / 60 % 60);
-    if($total_time_milliseconds > 3600000){
-        $hours = floor($total_time_milliseconds/1000 / 3600);
-        $timeFormat = sprintf('%02d:%02d:%02d.%03d', $hours, $mins, $secs, $millisecs);
-    }
-    else{
-        $timeFormat = sprintf('%02d:%02d.%03d', $mins, $secs, $millisecs);
-    }
-    return $timeFormat;
-}
-function format_style($style){
-    $styles_as_array = ["","Autohop","Scroll","Sideways","Half-Sideways","W-Only","A-Only","Backwards","Faste","Sustain"];
-    if(array_key_exists($style,$styles_as_array)){
-        return $styles_as_array[$style];
-    }
-    return '???';
-}
-function format_game($game){
-    $games_as_array = ["","Bhop","Surf","All"];
+
+use App\Classes\TableOfTimes;
+
+function formatGame($game){
+    $games_as_array = ["","Bhop","Surf"];
     if(array_key_exists($game,$games_as_array)){
         return $games_as_array[$game];
     }
     return '???';
 }
 
-function time_elapsed_string($datetime, $full = false) {
+function timeDifference($datetime, $full = false) {
     $UTC = new DateTimeZone('UTC');
     $now = new DateTime('now',$UTC);
     $ago = new DateTime($datetime);
@@ -82,7 +64,7 @@ function time_elapsed_string($datetime, $full = false) {
                                     <h2 class="text-sm text-center text-gray-600 overflow-hidden dark:text-gray-400">by <?php echo $map->creator; ?></h2>
                                     <div class="w-10/12 border-b border-gray-200  dark:border-gray-700 my-3 mx-auto"></div>
                                     <p class="text-center text-gray-700 dark:text-gray-300 mt-2">Released</p>
-                                    <p class="text-center text-gray-600 dark:text-gray-400"><?php echo time_elapsed_string($map->date) ?></p>
+                                    <p class="text-center text-gray-600 dark:text-gray-400"><?php echo timeDifference($map->date) ?></p>
                                     <p class="text-center text-gray-700 dark:text-gray-300 mt-2">Total times</p>
                                     <p class="text-center text-gray-600 dark:text-gray-400"><?php echo count($map->times) ?></p>
                                 </div>
@@ -92,41 +74,69 @@ function time_elapsed_string($datetime, $full = false) {
                             <div class=" rounded-lg h-full">
                             </div>
                         </div>
+                        <?php //;?>
                         <div class="col-span-12 mt-10">
-
+                            <div id="times-filters" class="flex justify-end mb-2 gap-2 flex-wrap">
+                                <select class="bg-gray-100 dark:bg-main-900 border-0 rounded-lg" required name="styles" id="style-filter" value="1">
+                                    <option value="1" selected="selected">Autohop</option>
+                                    <?php if($map->game === 1){ //only show scroll on bhop maps ?>
+                                            <option value="2">Scroll</option>
+                                    <?php }?>
+                                    <option value="3">Sideways</option>
+                                    <option value="4">Half-Sideways</option>
+                                    <option value="5">W-Only</option>
+                                    <option value="6">A-Only</option>
+                                    <option value="all">All</option>
+                                    <option hidden value="7">Faste</option>
+                                    <option hidden value="8">Sustain</option>
+                                </select>
+                                <input id="search-filter" class="bg-gray-100 dark:bg-main-900 border-0 rounded-lg" type="text" placeholder="Search">
+                                <button class="bg-gray-100 dark:bg-main-900 border-0 rounded-lg w-10 h-10 toggle-visibility" data-click-target="#times-advanced-filters">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="m-2 icon icon-tabler icon-tabler-adjustments-horizontal" viewBox="0 0 24 24" stroke-width="1.5" stroke="#fff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                        <circle cx="14" cy="6" r="2" />
+                                        <line x1="4" y1="6" x2="12" y2="6" />
+                                        <line x1="16" y1="6" x2="20" y2="6" />
+                                        <circle cx="8" cy="12" r="2" />
+                                        <line x1="4" y1="12" x2="6" y2="12" />
+                                        <line x1="10" y1="12" x2="20" y2="12" />
+                                        <circle cx="17" cy="18" r="2" />
+                                        <line x1="4" y1="18" x2="15" y2="18" />
+                                        <line x1="19" y1="18" x2="20" y2="18" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div id="times-advanced-filters" class="mb-4 bg-gray-200 dark:bg-main-850 p-4 rounded-lg grid grid-cols-12 gap-3 hidden">
+                                <div class="col-span-3">
+                                    <label class="ml-1 mb-1 block" for="sort-by">Sort By:</label>
+                                    <select class="bg-gray-0 dark:bg-main-750 border-0 rounded-lg w-full" required name="sort-by" id="sort-by-filter">
+                                        <option value="time" selected="selected">Time</option>
+                                        <option value="date-newest">Date (Newest first)</option>
+                                        <option value="date-oldest">Date (Oldest first)</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="hidden border-b-4 -mb-px border-blue-400"></div>
                             
                             <div id="tab-contents">
                                 <?php
-                                //$times = $primary_roblox_account->times;
-                                //$roblox_accounts = $user->robloxAccounts()->get();
-                                $times = $map->times()->orderby('time', 'asc')->get();
-                                $all_times_html = '';
-                                foreach ($times as $time) {
-                                    $time_html = '<a href="/user/'.$time->robloxaccount->user->id.'">
-                                    <div class="tr border-b border-gray-200 dark:border-main-750  text-gray-700 dark:text-gray-100 hover:text-black dark:hover:text-white">
-                                            <div class="td map-name"><span>'.trim($time->robloxaccount->username).'</span></div>
-                                            <div class="td time"><span>'.trim(format_time($time->time)).'</span></div>
-                                            <div class="td style"><span>'.trim(format_style($time->style)).'</span></div>
-                                            <div class="td date"><span>'.trim($time->date).'</span></div>
-                                    </div>
-                                    </a>';
-                                    $all_times_html .= $time_html;
-                                }
-
+                                $times = $map->times()->where('style', '=', 1)->orderby('time', 'asc')->get();
+                                $times_table = new TableOfTimes($times, 'map');
                                 ?>
-                                <div id="times-tab-1" class="times-table block w-full text-left border-x-2 border-b-2 dark:bg-main-700 border-gray-200 dark:border-main-800">
-                                    <div class="tr table-header bg-gray-200 dark:bg-main-800">
-                                        <div class="th map-name">User</div>
+                                <div id="times-tab-1" class="times-table block w-full text-left rounded-lg dark:bg-main-700 border-gray-200 dark:border-main-800">
+                                    <div class="tr table-header bg-gray-200 dark:bg-main-900 rounded-t-lg">
+                                        <div class="th name">User</div>
                                         <div class="th time">Time</div>
                                         <div class="th style">Style</div>
                                         <div class="th date">Date</div>
                                     </div>
-                                <?php echo $all_times_html; ?>
+                                    <div class="table-content">
+                                        <?php echo $times_table->generateTable(); ?>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
                     </div>
-                    
                 </div>
             </div>
         </div>
