@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Classes\ApiRequest;
+use App\Classes\TableOfTimes;
 use App\Models\RobloxAccount;
 use App\Models\Time;
+use Illuminate\Database\Eloquent\Builder;
  
 class TimesController extends Controller
 {
@@ -82,5 +84,57 @@ class TimesController extends Controller
             $data = array_merge($data,$user_times_data);
         }
         return $data;
+    }
+
+    public static function make_table($id, Request $request, Time $time){
+        $time = $time->newQuery();
+        $time->where('map_id','=',$id);
+        if($request->has('style-filter') && $request->input('style-filter') !== ''){
+            $time->where('style','=',$request->input('style-filter'));
+        }
+        if($request->has('sort-by-filter') && $request->input('sort-by-filter') !== ''){
+            switch ($request->input('sort-by-filter')) {
+                case 'time':
+                    $time->orderby('time', 'asc');
+                    break;
+                case 'date-newest':
+                    $time->orderby('date', 'desc');
+                    break;
+                case 'date-oldest':
+                    $time->orderby('date', 'asc');
+                    break;
+                default:
+                    break;
+            }
+        }
+        if($request->has('search-filter') && $request->input('search-filter') != ''){
+            $time->where(function(Builder $query)use($request){
+                    $query->where('time','like',$request->input('search-filter'))
+                ->orWhereHas('robloxAccount', function(Builder $query)use($request){
+                    $query->where('username', 'like', '%'.$request->input('search-filter').'%')
+                    ->orwhere('displayname','like','%'.$request->input('search-filter').'%');
+                });
+            });
+        }
+        $times = $time->get();
+        $table = new TableOfTimes($times, 'map');
+        return $table->generateTable();
+    }
+
+    /*TODO: make this go somewhere else idk */
+    private function reverseFormatTime($time){
+        $hours = 
+        $total_time_milliseconds = $time;
+        $millisecs = floor($total_time_milliseconds % 1000);
+        $secs = floor($total_time_milliseconds/1000 % 60);
+        $mins = floor($total_time_milliseconds/1000 / 60 % 60);
+        if($total_time_milliseconds > 3600000){
+            $hours = floor($total_time_milliseconds/1000 / 3600);
+            $timeFormat = sprintf('%02d:%02d:%02d.%03d', $hours, $mins, $secs, $millisecs);
+        }
+        else{
+            $timeFormat = sprintf('%02d:%02d.%03d', $mins, $secs, $millisecs);
+        }
+        return $timeFormat;
     }
 }

@@ -26,9 +26,14 @@ Route::get('/maps/refresh', [\App\Http\Controllers\MapsController::class, 'refre
 
 Route::get('/times/refresh', [\App\Http\Controllers\TimesController::class, 'refresh']);
 
+Route::put('/map/{id}/make-table', [\App\Http\Controllers\TimesController::class, 'make_table']);
+
 Route::group(['middleware' => 'auth'],function(){
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        return view('profile', [
+            'user' => auth()->user()
+        ]);
+        //return view('dashboard');
     })->name('dashboard');
 
     Route::view(uri:'settings', view:'settings')->name(name:'settings');
