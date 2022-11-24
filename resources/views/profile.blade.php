@@ -1,26 +1,8 @@
 <?php
-function format_time($time){
-    $total_time_milliseconds = $time;
-    $millisecs = floor($total_time_milliseconds % 1000);
-    $secs = floor($total_time_milliseconds/1000 % 60);
-    $mins = floor($total_time_milliseconds/1000 / 60 % 60);
-    if($total_time_milliseconds > 3600000){
-        $hours = floor($total_time_milliseconds/1000 / 3600);
-        $timeFormat = sprintf('%02d:%02d:%02d.%03d', $hours, $mins, $secs, $millisecs);
-    }
-    else{
-        $timeFormat = sprintf('%02d:%02d.%03d', $mins, $secs, $millisecs);
-    }
-    return $timeFormat;
-}
-function format_style($style){
-    $styles_as_array = ["","Autohop","Scroll","Sideways","Half-Sideways","W-Only","A-Only","Backwards","Faste","Sustain"];
-    if(array_key_exists($style,$styles_as_array)){
-        return $styles_as_array[$style];
-    }
-    return '???';
-}
-function format_game($game){
+
+use App\Classes\TableOfTimes;
+
+function formatGame($game){
     $games_as_array = ["","Bhop","Surf","All"];
     if(array_key_exists($game,$games_as_array)){
         return $games_as_array[$game];
@@ -66,7 +48,7 @@ function format_game($game){
                                     if($user->primary_game === $i || ($i==3 && $user->primary_game==null)){
                                         $default = 'id="default-tab"';
                                     } ?>
-                                    <li class="dark:text-white w-full h-full text-center mb-0 font-semibold text-gray-800 opacity-50 hover:opacity-100"><a class="w-full px-4 py-2 block" <?php echo $default ?> href="#times-tab-<?php echo $i ?>"><?php echo format_game($i) ?></a></li>
+                                    <li class="dark:text-white w-full h-full text-center mb-0 font-semibold text-gray-800 opacity-50 hover:opacity-100"><a class="w-full px-4 py-2 block" <?php echo $default ?> href="#times-tab-<?php echo $i ?>"><?php echo formatGame($i) ?></a></li>
                                 <?php } ?>
                             </ul>
                             <div class="hidden border-b-4 -mb-px border-blue-400"></div>
@@ -75,65 +57,28 @@ function format_game($game){
                                 <?php
                                 //$times = $primary_roblox_account->times;
                                 //$roblox_accounts = $user->robloxAccounts()->get();
-                                $times = $user->times()->orderby('date', 'desc')->get();
-                                $all_times_html = '';
-                                $bhop_times_html = '';
-                                $surf_times_html = '';
-                                foreach ($times as $time) {
-                                    $time_html = '<a href="/map/'.$time->map->id.'">
-                                    <div class="tr border-b border-gray-200 dark:border-main-750  text-gray-700 dark:text-gray-100 hover:text-black dark:hover:text-white">
-                                            <div class="td map-name"><span>'.trim($time->map->displayname).'</span></div>
-                                            <div class="td time"><span>'.trim(format_time($time->time)).'</span></div>
-                                            <div class="td style"><span>'.trim(format_style($time->style)).'</span></div>
-                                            <div class="td date"><span>'.trim($time->date).'</span></div>
-                                    </div>
-                                    </a>';
-                                    $all_times_html .= $time_html;
-                                    switch ($time->game) {
-                                        case 1:
-                                            $bhop_times_html .= $time_html;
-                                            break;
-                                        case 2:
-                                            $surf_times_html .= $time_html;
-                                            break;
-                                        default:
-                                            error_log('a time with an invalid game exists somehow? id:'.$time->id);
-                                            break;
-                                    }
+                                if($user->primary_game === 1 || $user->primary_game === 2){
+                                    $times = $user->times()->where('game', '=', $user->primary_game)->orderby('date', 'desc')->get();
                                 }
-
+                                else{
+                                    $times = $user->times()->orderby('date', 'desc')->get();
+                                }
+                                $times_table = new TableOfTimes($times, 'user');
                                 ?>
                                 <div id="times-tab-1" class="times-table block w-full text-left border-x-2 border-b-2 dark:bg-main-700 border-gray-200 dark:border-main-800">
                                     <div class="tr table-header bg-gray-200 dark:bg-main-800">
-                                        <div class="th map-name">Map</div>
+                                        <div class="th name">Map</div>
                                         <div class="th time">Time</div>
                                         <div class="th style">Style</div>
                                         <div class="th date">Date</div>
                                     </div>
-                                <?php echo $bhop_times_html; ?>
-                                </div>
-                                <div id="times-tab-2" class="times-table block w-full text-left border-x-2 border-b-2 dark:bg-main-700 border-gray-200 dark:border-main-800">
-                                    <div class="tr table-header bg-gray-200 dark:bg-main-800">
-                                        <div class="th map-name">Map</div>
-                                        <div class="th time">Time</div>
-                                        <div class="th style">Style</div>
-                                        <div class="th date">Date</div>
+                                    <div class="table-content">
+                                        <?php echo $times_table->generateTable(); ?>
                                     </div>
-                                    <?php echo $surf_times_html; ?>
-                                </div>
-                                <div id="times-tab-3" class="times-table block w-full text-left border-x-2 border-b-2 dark:bg-main-700 border-gray-200 dark:border-main-800">
-                                    <div class="tr table-header bg-gray-200 dark:bg-main-800">
-                                        <div class="th map-name">Map</div>
-                                        <div class="th time">Time</div>
-                                        <div class="th style">Style</div>
-                                        <div class="th date">Date</div>
-                                    </div>
-                                    <?php echo $all_times_html; ?>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
                 </div>
             </div>
         </div>

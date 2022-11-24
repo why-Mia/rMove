@@ -20,7 +20,7 @@ function format_style($style){
     }
     return '???';
 }
-function format_game($game){
+function formatGame($game){
     $games_as_array = ["","Bhop","Surf","All"];
     if(array_key_exists($game,$games_as_array)){
         return $games_as_array[$game];
@@ -67,7 +67,7 @@ function format_game($game){
                                         if(auth()->user()->primary_game === $i || ($i==3 && auth()->user()->primary_game==null)){
                                             $default = 'id="default-tab"';
                                         } ?>
-                                        <li class="dark:text-white w-full h-full text-center mb-0 font-semibold text-gray-800 opacity-50 hover:opacity-100"><a class="w-full px-4 py-2 block" <?php echo $default ?> href="#times-tab-<?php echo $i ?>"><?php echo format_game($i) ?></a></li>
+                                        <li class="dark:text-white w-full h-full text-center mb-0 font-semibold text-gray-800 opacity-50 hover:opacity-100"><a class="w-full px-4 py-2 block" <?php echo $default ?> href="#times-tab-<?php echo $i ?>"><?php echo formatGame($i) ?></a></li>
                                     <?php } ?>
                                 </ul>
                                 <div class="hidden border-b-4 -mb-px border-blue-400"></div>
