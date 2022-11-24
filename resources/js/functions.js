@@ -195,7 +195,7 @@
 //});
 
 
-
+/*
 let tabsContainer = document.querySelector("#tabs");
 
 let tabTogglers = tabsContainer.querySelectorAll("a");
@@ -207,22 +207,63 @@ tabTogglers.forEach(function(toggler) {
 
     let tabName = this.getAttribute("href");
 
-    let tabContents = document.querySelector("#tab-contents");
+    let tabContents = document.querySelector("#tabs");
 
     for (let i = 0; i < tabContents.children.length; i++) {
 
       tabTogglers[i].parentElement.classList.remove("border-blue-400", "border-b-4",  "-mb-px", "opacity-100");
       tabTogglers[i].parentElement.classList.add("opacity-50");
-      tabContents.children[i].classList.remove("hidden");
+      /*tabContents.children[i].classList.remove("hidden");
       if ("#" + tabContents.children[i].id === tabName) {
         continue;
       }
-      tabContents.children[i].classList.add("hidden");
-
+      tabContents.children[i].classList.add("hidden");*/
+/*
     }
     e.target.parentElement.classList.add("border-blue-400", "border-b-4", "-mb-px", "opacity-100");
     e.target.parentElement.classList.remove("opacity-50");
   });
 });
 
-document.getElementById("default-tab").click();
+document.getElementById("default-tab").click();*/
+function delay(milliseconds){
+    return new Promise(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
+}
+
+var filters = document.querySelectorAll('#times-filters input, #times-filters select, #times-advanced-filters input, #times-advanced-filters select');
+var table_contents = document.querySelector('.times-table>.table-content');
+filters.forEach(function(filter){
+    console.log(filter.classList);
+    filter.addEventListener("change", function(e){
+        e.preventDefault();
+        sendFiltersPutRequest(table_contents);
+    });
+});
+
+function sendFiltersPutRequest(table_contents){
+    table_contents.innerHTML = '';
+    table_contents.classList.add('loading');
+    var all_filters = document.querySelectorAll('#times-filters input, #times-filters select, #times-advanced-filters input, #times-advanced-filters select');
+    var all_filters_values = {};
+    all_filters.forEach(each_filter => {
+        all_filters_values[each_filter.id] = each_filter.value;
+    });
+    var request_body = JSON.stringify(all_filters_values);
+    fetch(window.location.pathname+'/make-table',{
+        method: 'PUT',
+        headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: request_body
+    })
+    .then((response) => response.text())
+    .then((data) => populateTable(data,table_contents));
+}
+
+function populateTable(data, table){
+    table.classList.remove('loading');
+    table.innerHTML = data;
+}
